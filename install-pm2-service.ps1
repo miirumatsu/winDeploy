@@ -94,6 +94,8 @@ if (-not (Test-Path -LiteralPath $pm2Script)) {
 }
 
 New-Item -ItemType Directory -Path $Pm2Home -Force | Out-Null
+[Environment]::SetEnvironmentVariable('PM2_HOME', $Pm2Home, 'Machine')
+$env:PM2_HOME = $Pm2Home
 $wrapperTarget = Join-Path $Pm2Home 'pm2-service.ps1'
 Copy-Item -LiteralPath $wrapperSource -Destination $wrapperTarget -Force
 

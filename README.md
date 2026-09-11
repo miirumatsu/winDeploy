@@ -43,6 +43,7 @@ The installer:
 5. Installs the generic NSSM service named `PM2`.
 6. Uses `C:\ProgramData\pm2` as the shared `PM2_HOME`.
 7. Configures service logs and automatic recovery.
+8. Stores `PM2_HOME` as a machine environment variable for future shells.
 
 Configure the NSSM service account after installation if it is different from the account used during setup. The account must be able to read the resolved Node and PM2 paths.
 
@@ -59,11 +60,9 @@ The wrapper invokes `PM2_SCRIPT` using `PM2_NODE_EXECUTABLE`, so changing the PM
 
 ## Register an application
 
-Use the same service account and shared `PM2_HOME`:
+Open a new PowerShell session after installing the service. The installer persists `PM2_HOME` as a machine environment variable, so it is available automatically:
 
 ```powershell
-$env:PM2_HOME = 'C:\ProgramData\pm2'
-
 $projectRoot = Read-Host 'Application project root'
 Set-Location $projectRoot
 nvm use (Get-Content -LiteralPath '.nvmrc' -Raw).Trim() --no-install
@@ -137,7 +136,6 @@ Do not configure NSSM with a project ecosystem path. Do not use `pm2-windows-sta
 
 ```powershell
 Get-Service PM2
-$env:PM2_HOME = 'C:\ProgramData\pm2'
 pm2 list
 pm2 prettylist
 Get-Content C:\ProgramData\pm2\pm2-service-error.log -Tail 100

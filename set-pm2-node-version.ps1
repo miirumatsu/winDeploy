@@ -77,6 +77,8 @@ if (-not (Test-Path -LiteralPath $pm2Script)) {
 
 $versionFile = Join-Path $Pm2Home 'pm2-node-version.txt'
 New-Item -ItemType Directory -Path $Pm2Home -Force | Out-Null
+[Environment]::SetEnvironmentVariable('PM2_HOME', $Pm2Home, 'Machine')
+$env:PM2_HOME = $Pm2Home
 Set-Content -LiteralPath $versionFile -Value $Version -NoNewline
 
 Invoke-Native -FilePath $NssmPath -Arguments @('stop', $ServiceName)
