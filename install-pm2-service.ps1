@@ -90,7 +90,6 @@ Invoke-Native -FilePath $NssmPath -Arguments @('set', $ServiceName, 'AppRotateOn
 Invoke-Native -FilePath $NssmPath -Arguments @('set', $ServiceName, 'AppRotateBytes', '10485760')
 Invoke-Native -FilePath $NssmPath -Arguments @('set', $ServiceName, 'AppExit', 'Default', 'Restart')
 Invoke-Native -FilePath $NssmPath -Arguments @('set', $ServiceName, 'AppThrottle', '5000')
-Invoke-Native -FilePath $NssmPath -Arguments @('set', $ServiceName, 'AppKillProcessTree', '1')
 Invoke-Native -FilePath $NssmPath -Arguments @('set', $ServiceName, 'Start', 'SERVICE_AUTO_START')
 
 if ($StartService) {
