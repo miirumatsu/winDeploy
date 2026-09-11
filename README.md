@@ -99,6 +99,19 @@ The command can therefore be used directly for both installed and new versions:
 .\set-pm2-node-version.ps1 -Version 25.2.1 -NssmPath 'D:\Tools\nssm\win64\nssm.exe'
 ```
 
+## Uninstall the PM2 service
+
+Remove only the generic NSSM service with:
+
+```powershell
+Set-Location D:\Tools\winDeploy
+.\uninstall-pm2-service.ps1 -NssmPath 'D:\Tools\nssm\win64\nssm.exe'
+```
+
+The uninstall script stops and removes the `PM2` service but preserves `C:\ProgramData\pm2`, including the saved PM2 process list and logs. This allows the service to be reinstalled later without losing registered applications.
+
+Removing the PM2 data, global PM2 packages, or NVM-managed Node.js versions is a separate manual cleanup operation and is intentionally not performed by this script.
+
 Applications do not need to change when the PM2 service runtime changes. An application runtime change is handled independently by updating that application’s `.nvmrc`, ensuring the version is installed, and refreshing that application’s PM2 entry:
 
 ```powershell
