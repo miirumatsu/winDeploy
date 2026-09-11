@@ -30,6 +30,28 @@ function Invoke-Native {
     }
 }
 
+function Start-NssmService {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $NssmExecutable,
+        [Parameter(Mandatory = $true)]
+        [string] $Name
+    )
+
+    & $NssmExecutable start $Name
+    $startExitCode = $LASTEXITCODE
+
+    try {
+        $service = Get-Service -Name $Name -ErrorAction Stop
+        $service.WaitForStatus([System.ServiceProcess.ServiceControllerStatus]::Running, [TimeSpan]::FromSeconds(60))
+    } catch {
+        $currentStatus = (Get-Service -Name $Name -ErrorAction SilentlyContinue).Status
+        throw "NSSM start returned exit code $startExitCode and service status '$currentStatus'. $($_.Exception.Message)"
+    }
+
+    Write-Host "Service '$Name' is running."
+}
+
 Assert-Administrator
 
 if (-not (Get-Command $NssmPath -ErrorAction SilentlyContinue) -and -not (Test-Path -LiteralPath $NssmPath)) {
@@ -93,7 +115,7 @@ Invoke-Native -FilePath $NssmPath -Arguments @('set', $ServiceName, 'AppThrottle
 Invoke-Native -FilePath $NssmPath -Arguments @('set', $ServiceName, 'Start', 'SERVICE_AUTO_START')
 
 if ($StartService) {
-    Invoke-Native -FilePath $NssmPath -Arguments @('start', $ServiceName)
+    Start-NssmService -NssmExecutable $NssmPath -Name $ServiceName
 }
 
 Write-Host "NSSM PM2 service configured: $ServiceName"

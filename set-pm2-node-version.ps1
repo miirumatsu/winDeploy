@@ -22,6 +22,28 @@ function Invoke-Native {
     }
 }
 
+function Start-NssmService {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $NssmExecutable,
+        [Parameter(Mandatory = $true)]
+        [string] $Name
+    )
+
+    & $NssmExecutable start $Name
+    $startExitCode = $LASTEXITCODE
+
+    try {
+        $service = Get-Service -Name $Name -ErrorAction Stop
+        $service.WaitForStatus([System.ServiceProcess.ServiceControllerStatus]::Running, [TimeSpan]::FromSeconds(60))
+    } catch {
+        $currentStatus = (Get-Service -Name $Name -ErrorAction SilentlyContinue).Status
+        throw "NSSM start returned exit code $startExitCode and service status '$currentStatus'. $($_.Exception.Message)"
+    }
+
+    Write-Host "Service '$Name' is running."
+}
+
 $Version = $Version.Trim().TrimStart('v')
 if ($Version -notmatch '^\d+\.\d+\.\d+$') {
     throw "Invalid Node.js version: $Version"
@@ -59,7 +81,7 @@ Set-Content -LiteralPath $versionFile -Value $Version -NoNewline
 
 Invoke-Native -FilePath $NssmPath -Arguments @('stop', $ServiceName)
 Invoke-Native -FilePath $NssmPath -Arguments @('set', $ServiceName, 'AppEnvironmentExtra', "PM2_HOME=$Pm2Home", "PM2_NODE_VERSION=$Version", "PM2_NODE_EXECUTABLE=$nodeExecutable", "PM2_SCRIPT=$pm2Script")
-Invoke-Native -FilePath $NssmPath -Arguments @('start', $ServiceName)
+Start-NssmService -NssmExecutable $NssmPath -Name $ServiceName
 
 Write-Host "PM2 service $ServiceName now uses Node.js $Version."
 Write-Host "Node.js: $nodeExecutable"
